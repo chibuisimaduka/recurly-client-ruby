@@ -421,14 +421,11 @@ module Recurly
               }
             end
           else
-            if XML.cast(el).kind_of? Hash
-              recurlyHash = XML.cast el
-              record[el.name] = Address.new
-              recurlyHash.each_pair do |k, v|
-                record[el.name][k] = v
-              end
+            val = XML.cast(el)
+            record[el.name] = if val.kind_of? Hash
+              Address.new val
             else
-              record[el.name] = XML.cast el
+              val
             end
           end
         end
@@ -703,7 +700,6 @@ module Recurly
         node = builder.add_element key
 
         # Duck-typing here is problematic because of ActiveSupport's #to_xml.
-        puts value
         case value
         when Resource, Subscription::AddOns
           value.to_xml options.merge(:builder => node)
